@@ -39,3 +39,9 @@
 
 # debug information files
 *.dwo
+
+# MCU bender driver
+*.s
+*.icf
+Drivers/*
+
