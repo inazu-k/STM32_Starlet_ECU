@@ -1,16 +1,16 @@
 # STM32_Starlet_ECU
 
 ## 使用ボード
-- ST Micro 製 NUCLEO-F446RE
-- ボードピン配置は下図を参照のこと
+- ST Micro 製 NUCLEO-F446RE  
+- ボードピン配置は下図を参照のこと   
 ![NUCREO-F446RE ピンアサイン](Docs_design/NUCREO-F446RE_ピンアサイン.png)
 
-- マイコンピンとボートピンの対応は下図を参照のこと
+- マイコンピンとボートピンの対応は下図を参照のこと  
 ![NUCREO-F446RE CNピン](Docs_design/NUCREO-F446RE_コネクタピン配置.png)
 
 ## 使用マイコン
- - ST Micro製 STM32マイコン (型番：STM32F446RET6)
- - 構成は添付図を参照のこと
+ - ST Micro製 STM32マイコン (型番：STM32F446RET6)  
+ - 構成は添付図を参照のこと  
 ![STM32F446RET6 構成図](Docs_design/STM32F446RET6_構成図.png)
 
 ##ボードピンアサイン
