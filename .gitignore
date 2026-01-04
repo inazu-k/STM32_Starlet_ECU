@@ -45,3 +45,8 @@
 *.icf
 Drivers/*
 
+# build binary
+build/*
+
+# Document File
+*.pdf
