@@ -107,8 +107,10 @@ int main(void)
     /* USER CODE END WHILE */
 
     // メイン処理
-    SensorDataSample(); // センサデータの取り込み
-    CalcFuelInjection(); // 燃料噴射量計算
+    SensorDataSample();   // センサデータの取り込み
+    ReadGPIOPort();       // ポート読み取り
+    JdgIdle();            // アイドル判定
+    CalcFuelInjection();  // 燃料噴射量計算
     CalcIgnitionTiming(); // 点火時期計算
     
     /* USER CODE BEGIN 3 */
