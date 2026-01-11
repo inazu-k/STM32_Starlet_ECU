@@ -5,6 +5,8 @@
 - ボードピン配置は下図を参照のこと   
 ![NUCREO-F446RE ピンアサイン](Docs_design/NUCREO-F446RE_ピンアサイン.png)
 
+- ピンマップ（CSV / Markdown）: [hardware/pinmap.md](hardware/pinmap.md)
+
 - マイコンピンとボートピンの対応は下図を参照のこと  
 ![NUCREO-F446RE CNピン](Docs_design/NUCREO-F446RE_コネクタピン配置.png)
 
