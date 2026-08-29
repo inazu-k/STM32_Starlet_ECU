@@ -45,6 +45,19 @@ ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;
 
 UART_HandleTypeDef huart2;
+TIM_HandleTypeDef htim2;
+
+typedef struct
+{
+  GPIO_TypeDef *port;
+  uint16_t pin;
+  uint32_t period_ms;
+  uint32_t counter;
+  uint8_t enabled;
+} GpioTimerTask_t;
+
+#define GPIO_TIMER_TASK_NUM 3
+static GpioTimerTask_t gpio_tasks[GPIO_TIMER_TASK_NUM];
 
 /* USER CODE BEGIN PV */
 
@@ -56,6 +69,8 @@ static void MX_GPIO_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_ADC2_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_TIM2_Init(void);
+static void InitGpioTimerTasks(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -97,6 +112,9 @@ int main(void)
   MX_ADC1_Init();
   MX_ADC2_Init();
   MX_USART2_UART_Init();
+  MX_TIM2_Init();
+  InitGpioTimerTasks();
+  HAL_TIM_Base_Start_IT(&htim2);
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -375,6 +393,66 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+static void MX_TIM2_Init(void)
+{
+  __HAL_RCC_TIM2_CLK_ENABLE();
+
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 4199;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 9;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  HAL_NVIC_SetPriority(TIM2_IRQn, 2, 0);
+  HAL_NVIC_EnableIRQ(TIM2_IRQn);
+}
+
+static void InitGpioTimerTasks(void)
+{
+  gpio_tasks[0].port = GPIOA;
+  gpio_tasks[0].pin = LD2_Pin;
+  gpio_tasks[0].period_ms = 100;
+  gpio_tasks[0].counter = 0;
+  gpio_tasks[0].enabled = 1;
+
+  gpio_tasks[1].port = GPIOC;
+  gpio_tasks[1].pin = GPIO_PIN_10;
+  gpio_tasks[1].period_ms = 250;
+  gpio_tasks[1].counter = 0;
+  gpio_tasks[1].enabled = 1;
+
+  gpio_tasks[2].port = GPIOB;
+  gpio_tasks[2].pin = GPIO_PIN_7;
+  gpio_tasks[2].period_ms = 500;
+  gpio_tasks[2].counter = 0;
+  gpio_tasks[2].enabled = 1;
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  if (htim->Instance == TIM2)
+  {
+    for (uint8_t i = 0; i < GPIO_TIMER_TASK_NUM; i++)
+    {
+      if (gpio_tasks[i].enabled)
+      {
+        gpio_tasks[i].counter++;
+
+        if (gpio_tasks[i].counter >= gpio_tasks[i].period_ms)
+        {
+          gpio_tasks[i].counter = 0;
+          HAL_GPIO_TogglePin(gpio_tasks[i].port, gpio_tasks[i].pin);
+        }
+      }
+    }
+  }
+}
 
 /* USER CODE END 4 */
 
