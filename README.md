@@ -1,117 +1,59 @@
-# STM32_Starlet_ECU
+# STM32 Starlet ECU
 
-## 使用ボード
-- ST Micro 製 NUCLEO-F446RE  
-- ボードピン配置は下図を参照のこと   
-![NUCREO-F446RE ピンアサイン](Docs_design/NUCREO-F446RE_ピンアサイン.png)
+4E-FTEエンジン向けの制御ECUをSTM32上に開発するプロジェクトです。最終的には純正ECUを置き換え、センサ入力に基づく燃料噴射・点火制御を目指します。
 
-- ピンマップ（CSV / Markdown）: [hardware/pinmap.md](hardware/pinmap.md)
+## 開発ターゲット
 
-- マイコンピンとボートピンの対応は下図を参照のこと  
-![NUCREO-F446RE CNピン](Docs_design/NUCREO-F446RE_コネクタピン配置.png)
+- 試作ボード: ST NUCLEO-F446RE
+- MCU: STM32F446RET6
+- 言語: C11
+- ビルドシステム: CMake、Ninja、GNU Arm Embedded Toolchain
 
-## 使用マイコン
- - ST Micro製 STM32マイコン (型番：STM32F446RET6)  
- - 構成は添付図を参照のこと  
+ボードのコネクタとMCU端子の対応は[ピンマップ](hardware/pinmap.md)を参照してください。ECU機能の端子割当、要求、未確定事項は[ECU要求仕様書](Docs_design/ECU_Requirements_Specification.md)に記載しています。
+
+![NUCLEO-F446RE ピンアサイン](Docs_design/NUCREO-F446RE_ピンアサイン.png)
+
 ![STM32F446RET6 構成図](Docs_design/STM32F446RET6_構成図.png)
 
-##ボードピンアサイン
+## 現在の開発状況
 
-### システムピンアサイン(CN7)
+現在は試作段階です。NE/G1/G2からクランク位置を推定する同期処理、実際のインジェクタ駆動、IGT点火制御、ISCV制御はまだ完成していません。ADCサンプリングやGPIOトグル等の試作コードが含まれており、実機用制御ファームウェアではありません。
 
-CN7 の NUCREO(Morpho) → MCU ピン対応は下表のとおり
+## ビルド
 
-| Morpho PIN | MCU PIN | システム機能 | MCU機能 | 備考 |
-|---:|:---:|:---|:---|:---|
-| 1 | PC10 | 点火信号 |  |  |
-| 2 | PC11 |  |  |  |
-| 3 | PC12 | インジェクタ #10 |  |  |
-| 4 | PD2 |  |  |  |
-| 5 | VDD |  |  |  |
-| 6 | E5V | 外部からの5V入力 |  |  |
-| 7 | BOOT0 |  |  |  |
-| 8 | GND |  |  |  |
-| 9 | - |  |  |  |
-| 10 | - |  |  |  |
-| 11 | - |  |  |  |
-| 12 | IOREF |  |  |  |
-| 13 | PA13 |  |  |  |
-| 14 | RESET | 外部リセット |  |  |
-| 15 | PA14 |  |  |  |
-| 16 | +3.3V | 3.3V電源 |  |  |
-| 17 | PA15 |  |  |  |
-| 18 | +5V | 5V電源 |  |  |
-| 19 | GND | GND |  |  |
-| 20 | GND | GND |  |  |
-| 21 | PB7 | インジェクタ #20 |  |  |
-| 22 | GND |  |  |  |
-| 23 | PC13 |  |  |  |
-| 24 | VIN | 外部からの7~12V入力 |  |  |
-| 25 | PC14 |  |  |  |
-| 26 | - |  |  |  |
-| 27 | PC15 |  |  |  |
-| 28 | PA0 |  |  |  |
-| 29 | PH0 |  |  |  |
-| 30 | PA1 |  |  |  |
-| 31 | PH1 |  |  |  |
-| 32 | PA4 | 未割り当て（旧油圧入力候補。ECUでは監視しない） | ADC123_IN4 |  |
-| 33 | VBAT |  |  |  |
-| 34 | PB0 |  |  |  |
-| 35 | PC2 | 未割り当て（旧油圧入力候補。ECUでは監視しない） | ADC123_IN12 |  |
-| 36 | PC1 (販売時) / PB9 (半田オプション) | 半田オプション |  |  |
-| 37 | PC3 | MAPセンサ入力 | ADC123_IN13 |  |
-| 38 | PC0 (販売時) / PB8 (半田オプション) | 半田オプション |  |  |
+必要なツールをインストールし、`cmake`、`ninja`、`arm-none-eabi-gcc`がPATHから実行できるようにしてください。
 
+- CMake 3.22以降
+- Ninja
+- GNU Arm Embedded Toolchain (`arm-none-eabi-gcc`、`arm-none-eabi-g++`、`arm-none-eabi-objcopy`等)
 
-## システムピンアサイン(CN10)
+リポジトリのルートでDebugビルドを実行します。
 
-CN10 の NUCLEO(Morpho) → MCU ピン対応は下表のとおり
+```sh
+cmake --preset Debug
+cmake --build --preset Debug
+```
 
-| Morpho PIN | MCU PIN | 機能 | MCU機能 | 備考 |
-|---:|:---:|:---|:---|:---|
-| 1 | PC9 |  |  |  |
-| 2 | PC8 |  |  |  |
-| 3 | PB8 | G1 IN |  |  |
-| 4 | PC6 | NE入力 |  |  |
-| 5 | PB9 | G2 IN |  |  |
-| 6 | PC5 |  |  |  |
-| 7 | AVDD | アナログ電源 |  |  |
-| 8 | U5V | USBからの5V |  |  |
-| 9 | GND |  |  |  |
-| 10 | - |  |  |  |
-| 11 | PA5 |  |  |  |
-| 12 | PA12 |  |  |  |
-| 13 | PA6 | A/Fセンサ IN | ADC12_IN6 |  |
-| 14 | PA11 |  |  |  |
-| 15 | PA7 | ノックセンサ IN | ADC12_IN7 |  |
-| 16 | PB12 |  |  |  |
-| 17 | PB6 |  |  |  |
-| 18 | - |  |  |  |
-| 19 | PC7 |  |  |  |
-| 20 | GND |  |  |  |
-| 21 | PA9 | インジェクタ #30 |  |  |
-| 22 | PB2 |  |  |  |
-| 23 | PA8 | インジェクタ #40 |  |  |
-| 24 | PB1 |  |  |  |
-| 25 | PB10 |  |  |  |
-| 26 | PB15 |  |  |  |
-| 27 | PB4 | NE入力 |  |  |
-| 28 | PB14 |  |  |  |
-| 29 | PB5 |  |  |  |
-| 30 | PB13 |  |  |  |
-| 31 | PB3 |  |  |  |
-| 32 | AGND |  |  |  |
-| 33 | PA11 |  |  |  |
-| 34 | PC4 | 水温センサ IN | ADC12_IN14 |  |
-| 35 | PA2 |  |  |  |
-| 36 | 0 |  |  |  |
-| 37 | PA3 |  |  |  |
-| 38 | - |  |  |  |
+Releaseビルドは次のとおりです。
 
+```sh
+cmake --preset Release
+cmake --build --preset Release
+```
 
+ELF成果物は`build/Debug/stm32_starlet_ecu.elf`または`build/Release/stm32_starlet_ecu.elf`に生成されます。現在の設定には書き込み・実機動作確認の手順は含まれていません。
 
+## 安全上の注意
 
+**現状のファームウェアをインジェクタ、イグナイタ、車載ハーネスまたはエンジンへ接続しないでください。** 試作用のGPIOトグルがPC10（点火信号候補）やPB7（インジェクタ出力候補）を駆動し、ADCチャンネルも実センサの端子割当と一致していません。車載センサやアクチュエータを接続する前に、要求仕様書の端子整合レビューを確認してください。
 
+開発初期の確認は、信号発生器と模擬負荷を使うベンチ試験を前提とします。同期喪失時や過回転時の出力動作には安全審査が未完了の項目があり、実機で有効化できる仕様として承認されていません。
 
+## ドキュメント
 
-
+- [ECU要求仕様・開発ステップ・端子整合レビュー](Docs_design/ECU_Requirements_Specification.md)
+- [NUCLEO-F446RE ピンマップ（Markdown）](hardware/pinmap.md)
+- [NUCLEO-F446RE ピンマップ（CSV）](hardware/pinmap.csv)
+- [STM32CubeMX設定](stm32_starlet_ecu.ioc)
+- [NUCLEO-F446RE ユーザーマニュアル](Docs_mcu/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics-1.pdf)
+- [STM32F446xx リファレンスマニュアル](Docs_mcu/rm0390-stm32f446xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
