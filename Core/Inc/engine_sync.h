@@ -33,11 +33,12 @@ typedef struct {
 /* All calls must be serialized. No output control is performed by this module. */
 bool engine_sync_init(EngineSync *sync, SyncConfig config);
 /*
- * One call per captured NE falling edge, in chronological order. marker is
+ * One call per acquired NE falling edge, in chronological order. marker is
  * the paired GPIO snapshot: NONE=both low, G1=only G1 high, G2=only G2 high,
  * INVALID=both high or an unreliable snapshot. The acquisition layer must
  * guarantee the documented G setup/hold time and pair samples with NE events.
- * tick is the captured NE time, not processing time. Config units must match.
+ * tick is the acquisition-layer timestamp, not main processing time. A GPIO
+ * IRQ timestamp includes interrupt latency. Config units must match.
  * Unsigned 32-bit tick wrap is supported; gaps >= 2^31 ticks are not supported.
  */
 void engine_sync_tooth(EngineSync *sync, uint32_t tick, SyncMarker marker);

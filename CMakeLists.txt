@@ -29,6 +29,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 # Core project settings
 project(${CMAKE_PROJECT_NAME})
+option(STARLET_SYNC_BENCH "Enable PC6/PB8/PB9 GPIO sync acquisition with bench limits" OFF)
 message("Build type: " ${CMAKE_BUILD_TYPE})
 
 # Enable CMake support for ASM and C languages
@@ -49,7 +50,13 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     Core/Src/engine_sync.c
+    Core/Src/engine_sync_service.c
 )
+
+if(STARLET_SYNC_BENCH)
+    target_sources(${CMAKE_PROJECT_NAME} PRIVATE Core/Src/engine_sync_board.c)
+    target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE STARLET_SYNC_BENCH=1)
+endif()
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE

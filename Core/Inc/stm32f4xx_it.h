@@ -56,6 +56,9 @@ void DebugMon_Handler(void);
 void PendSV_Handler(void);
 void SysTick_Handler(void);
 /* USER CODE BEGIN EFP */
+#ifdef STARLET_SYNC_BENCH
+void EXTI9_5_IRQHandler(void);
+#endif
 
 /* USER CODE END EFP */
 

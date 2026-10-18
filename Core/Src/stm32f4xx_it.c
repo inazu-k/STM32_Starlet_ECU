@@ -22,6 +22,9 @@
 #include "stm32f4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#ifdef STARLET_SYNC_BENCH
+#include "engine_sync_board.h"
+#endif
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -200,6 +203,13 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /* USER CODE BEGIN 1 */
+#ifdef STARLET_SYNC_BENCH
+void EXTI9_5_IRQHandler(void)
+{
+  engine_sync_board_ne_irq();
+}
+#endif
+
 void TIM2_IRQHandler(void)
 {
   HAL_TIM_IRQHandler(&htim2);

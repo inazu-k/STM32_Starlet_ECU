@@ -22,6 +22,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#ifdef STARLET_SYNC_BENCH
+#include "engine_sync_board.h"
+#endif
 
 /* USER CODE END Includes */
 
@@ -116,6 +119,9 @@ int main(void)
   InitGpioTimerTasks();
   HAL_TIM_Base_Start_IT(&htim2);
   /* USER CODE BEGIN 2 */
+#ifdef STARLET_SYNC_BENCH
+  if (!engine_sync_board_init()) Error_Handler();
+#endif
 
   /* USER CODE END 2 */
 
@@ -126,7 +132,13 @@ int main(void)
     /* USER CODE END WHILE */
 
     // メイン処理
+#ifdef STARLET_SYNC_BENCH
+    engine_sync_board_run();
+#endif
     SensorDataSample();   // センサデータの取り込み
+#ifdef STARLET_SYNC_BENCH
+    engine_sync_board_run();
+#endif
     ReadGPIOPort();       // ポート読み取り
     JdgIdle();            // アイドル判定
     CalcFuelInjection();  // 燃料噴射量計算

@@ -98,9 +98,8 @@ void ReadGPIOPort(void)
 {
     /* 入力ピン数本の状態をバイトにパックして簡易チェック用とする */
     gpio_port_state = 0;
-    /* 例: MX_GPIO_Init で設定されている B1（ユーザボタン）、PC6 などを読む */
+    /* PC6 is reserved for NE acquisition; do not use it as a generic input. */
     if (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_SET) gpio_port_state |= 0x01;
-    if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_6) == GPIO_PIN_SET) gpio_port_state |= 0x02;
     if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_4) == GPIO_PIN_SET) gpio_port_state |= 0x04;
 }
 

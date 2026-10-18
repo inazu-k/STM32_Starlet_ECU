@@ -8,3 +8,12 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(engine_sync_tests PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
 add_test(NAME engine_sync COMMAND engine_sync_tests)
+
+add_executable(engine_sync_service_tests engine_sync_service_test.c
+    ../Core/Src/engine_sync.c ../Core/Src/engine_sync_service.c)
+target_include_directories(engine_sync_service_tests PRIVATE ../Core/Inc)
+set_target_properties(engine_sync_service_tests PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(engine_sync_service_tests PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+add_test(NAME engine_sync_service COMMAND engine_sync_service_tests)
