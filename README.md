@@ -52,6 +52,7 @@ ELF成果物は`build/Debug/stm32_starlet_ecu.elf`または`build/Release/stm32_
 ## ドキュメント
 
 - [ECU要求仕様・開発ステップ・端子整合レビュー](Docs_design/ECU_Requirements_Specification.md)
+- [ECUソフトウェア設計（GPIO入力・割り込み・同期処理）](Docs_design/ECU_Software_Design.md)
 - [NUCLEO-F446RE ピンマップ（Markdown）](hardware/pinmap.md)
 - [NUCLEO-F446RE ピンマップ（CSV）](hardware/pinmap.csv)
 - [STM32CubeMX設定](stm32_starlet_ecu.ioc)
