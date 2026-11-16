@@ -117,7 +117,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM2_Init();
   InitGpioTimerTasks();
-  HAL_TIM_Base_Start_IT(&htim2);
+  if (HAL_TIM_Base_Start_IT(&htim2) != HAL_OK) Error_Handler();
   /* USER CODE BEGIN 2 */
 #ifdef STARLET_SYNC_BENCH
   if (!engine_sync_board_init()) Error_Handler();
@@ -141,8 +141,7 @@ int main(void)
 #endif
     ReadGPIOPort();       // ポート読み取り
     JdgIdle();            // アイドル判定
-    CalcFuelInjection();  // 燃料噴射量計算
-    CalcIgnitionTiming(); // 点火時期計算
+    /* 燃料・点火要求は校正済み入力の供給後に接続する（確認リスト参照）。 */
     
     /* USER CODE BEGIN 3 */
   }
@@ -235,9 +234,9 @@ static void MX_ADC1_Init(void)
 
   /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
   */
-  sConfig.Channel = ADC_CHANNEL_4;
+  sConfig.Channel = ADC_CHANNEL_13;
   sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  sConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -287,9 +286,9 @@ static void MX_ADC2_Init(void)
 
   /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
   */
-  sConfig.Channel = ADC_CHANNEL_12;
+  sConfig.Channel = ADC_CHANNEL_14;
   sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  sConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -412,7 +411,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 4199;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 9;
+  htim2.Init.Period = 19;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
 
@@ -437,13 +436,13 @@ static void InitGpioTimerTasks(void)
   gpio_tasks[1].pin = GPIO_PIN_10;
   gpio_tasks[1].period_ms = 250;
   gpio_tasks[1].counter = 0;
-  gpio_tasks[1].enabled = 1;
+  gpio_tasks[1].enabled = 0;
 
   gpio_tasks[2].port = GPIOB;
   gpio_tasks[2].pin = GPIO_PIN_7;
   gpio_tasks[2].period_ms = 500;
   gpio_tasks[2].counter = 0;
-  gpio_tasks[2].enabled = 1;
+  gpio_tasks[2].enabled = 0;
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
@@ -499,3 +498,4 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+

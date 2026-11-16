@@ -17,7 +17,10 @@
 
 ## 現在の開発状況
 
-現在は試作段階です。NE/G1/G2からクランク位置を推定する同期処理、実際のインジェクタ駆動、IGT点火制御、ISCV制御はまだ完成していません。ADCサンプリングやGPIOトグル等の試作コードが含まれており、実機用制御ファームウェアではありません。
+同期コア・ベンチ用GPIO取得に加え、TDC校正角、回転数換算、テーブル補間、燃料分配、論理噴射予約を実装しています。ADCはセンサ別の生値と取得成否を公開し、PC10/PB7の試作用トグルは無効化しました。追加した計算・予約モジュールは実出力に未接続です。点火・ISCV・設定通信・Flash保存や物理量校正は未確定仕様の回答待ちで、実機用ファームウェアの完成を意味しません。
+
+- [実装状況とAPIの利用契約](Docs_design/IMPLEMENTATION_STATUS.md)
+- [仕様追加確認リスト](Docs_design/IMPLEMENTATION_CONFIRMATIONS.md)
 
 ## ビルド
 
@@ -27,17 +30,20 @@
 - Ninja
 - GNU Arm Embedded Toolchain (`arm-none-eabi-gcc`、`arm-none-eabi-g++`、`arm-none-eabi-objcopy`等)
 
-リポジトリのルートでDebugビルドを実行します。
+HAL/CMSISとstartupはSDK依存です。クリーン環境では、STM32CubeF4 v1.28.2を**サブモジュールを含めて**取得し、SDKパスを指定します（ソース生成による既存コードの上書きは不要）。
 
 ```sh
-cmake --preset Debug
+git clone --branch v1.28.2 --depth 1 --recurse-submodules --shallow-submodules https://github.com/STMicroelectronics/STM32CubeF4.git ../STM32CubeF4
+cmake --preset Debug -DSTM32CUBE_F4_PATH=../STM32CubeF4
 cmake --build --preset Debug
 ```
+
+既にCubeMX 6.14.1 / STM32Cube FW_F4 V1.28.2から生成した`Drivers/`と`startup_stm32f446xx.s`がある場合は、SDKパスを省略できます。再生成時はUSER CODE外の追加処理とCMake変更を差分で確認してください。依存SDKをリポジトリへ同梱する必要はありません。取得したSDKは独自のライセンスに従います。
 
 Releaseビルドは次のとおりです。
 
 ```sh
-cmake --preset Release
+cmake --preset Release -DSTM32CUBE_F4_PATH=../STM32CubeF4
 cmake --build --preset Release
 ```
 
@@ -50,7 +56,7 @@ ELF成果物は`build/Debug/stm32_starlet_ecu.elf`または`build/Release/stm32_
 `STARLET_SYNC_BENCH`は既定でOFFです。信号発生器用のGPIO同期取得を有効にする場合は次のようにビルドします。
 
 ```sh
-cmake --preset Debug -DSTARLET_SYNC_BENCH=ON
+cmake --preset Debug -DSTM32CUBE_F4_PATH=../STM32CubeF4 -DSTARLET_SYNC_BENCH=ON
 cmake --build --preset Debug
 ```
 
@@ -60,7 +66,7 @@ NE=PC6/CN10-4の立下り割り込み、G1=PB8/CN10-3、G2=PB9/CN10-5、TIM5=1 M
 
 ### 現状の接続制限
 
-**現状のファームウェアをインジェクタ、イグナイタ、車載ハーネスまたはエンジンへ接続しないでください。** 試作用のGPIOトグルがPC10（点火信号候補）やPB7（インジェクタ出力候補）を駆動し、ADCチャンネルも実センサの端子割当と一致していません。車載センサやアクチュエータを接続する前に、要求仕様書の端子整合レビューを確認してください。
+**現状のファームウェアをインジェクタ、イグナイタ、車載ハーネスまたはエンジンへ接続しないでください。** PC10/PB7の試作トグルと誤ADCチャネルは修正しましたが、出力ドライバ・非作動極性・センサ回路・実機校正は未確定です。追加計算・論理予約は実出力に接続していません。必要な回答は[確認リスト](Docs_design/IMPLEMENTATION_CONFIRMATIONS.md)に記載しています。
 
 開発初期の確認は、信号発生器と模擬負荷を使うベンチ試験を前提とします。同期喪失時や過回転時の出力動作には安全審査が未完了の項目があり、実機で有効化できる仕様として承認されていません。
 
@@ -73,3 +79,15 @@ NE=PC6/CN10-4の立下り割り込み、G1=PB8/CN10-3、G2=PB9/CN10-5、TIM5=1 M
 - [STM32CubeMX設定](stm32_starlet_ecu.ioc)
 - [NUCLEO-F446RE ユーザーマニュアル](Docs_mcu/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics-1.pdf)
 - [STM32F446xx リファレンスマニュアル](Docs_mcu/rm0390-stm32f446xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
+
+
+
+## ホスト試験
+
+C11コンパイラとPython 3があればSDK・CMakeなしで実行できます。
+
+```sh
+python3 tests/run_host_tests.py
+```
+
+詳細は[tests/README.md](tests/README.md)を参照してください。

@@ -11,45 +11,47 @@ set(MX_Defines_Syms
 # STM32CubeMX generated include paths
 set(MX_Include_Dirs
     ${CMAKE_SOURCE_DIR}/Core/Inc
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Inc
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Inc/Legacy
-    ${CMAKE_SOURCE_DIR}/Drivers/CMSIS/Device/ST/STM32F4xx/Include
-    ${CMAKE_SOURCE_DIR}/Drivers/CMSIS/Include
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Inc
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Inc/Legacy
+    ${STARLET_DRIVERS}/CMSIS/Device/ST/STM32F4xx/Include
+    ${STARLET_DRIVERS}/CMSIS/Include
 )
 
 # STM32CubeMX generated application sources
 set(MX_Application_Src
     ${CMAKE_SOURCE_DIR}/Core/Src/main.c
     ${CMAKE_SOURCE_DIR}/Core/Src/efi_calc.c
+    ${CMAKE_SOURCE_DIR}/Core/Src/ecu_model.c
+    ${CMAKE_SOURCE_DIR}/Core/Src/injection_plan.c
     ${CMAKE_SOURCE_DIR}/Core/Src/stm32f4xx_it.c
     ${CMAKE_SOURCE_DIR}/Core/Src/stm32f4xx_hal_msp.c
     ${CMAKE_SOURCE_DIR}/Core/Src/sysmem.c
     ${CMAKE_SOURCE_DIR}/Core/Src/syscalls.c
-    ${CMAKE_SOURCE_DIR}/startup_stm32f446xx.s
+    ${STARLET_STARTUP}
 )
 
 # STM32 HAL/LL Drivers
 set(STM32_Drivers_Src
     ${CMAKE_SOURCE_DIR}/Core/Src/system_stm32f4xx.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc_ex.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_adc.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc_ex.c
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_adc.c
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.c
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c
 )
 
 # Drivers Midllewares
@@ -92,3 +94,4 @@ set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES ADDITIONAL_CLEAN_FILES ${
 if((CMAKE_C_STANDARD EQUAL 90) OR (CMAKE_C_STANDARD EQUAL 99))
     message(ERROR "Generated code requires C11 or higher")
 endif()
+

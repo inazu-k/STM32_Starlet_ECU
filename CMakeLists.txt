@@ -38,6 +38,26 @@ enable_language(C ASM)
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME})
 
+# STM32CubeMX生成済みファイル、または明示したSTM32CubeF4 SDKを使用する。
+set(STM32CUBE_F4_PATH "" CACHE PATH "STM32CubeF4 v1.28.2 root (recursive checkout)")
+if(STM32CUBE_F4_PATH)
+    get_filename_component(STARLET_SDK "${STM32CUBE_F4_PATH}" ABSOLUTE)
+    set(STARLET_DRIVERS "${STARLET_SDK}/Drivers")
+    set(STARLET_STARTUP "${STARLET_DRIVERS}/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f446xx.s")
+else()
+    set(STARLET_DRIVERS "${CMAKE_SOURCE_DIR}/Drivers")
+    set(STARLET_STARTUP "${CMAKE_SOURCE_DIR}/startup_stm32f446xx.s")
+endif()
+foreach(required IN ITEMS
+    "${STARLET_STARTUP}"
+    "${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h"
+    "${STARLET_DRIVERS}/CMSIS/Include/core_cm4.h"
+    "${STARLET_DRIVERS}/CMSIS/Device/ST/STM32F4xx/Include/stm32f446xx.h")
+    if(NOT EXISTS "${required}")
+        message(FATAL_ERROR "Missing SDK file: ${required}. See README: STM32CubeF4 v1.28.2 setup; set STM32CUBE_F4_PATH or generate with CubeMX.")
+    endif()
+endforeach()
+
 # Add STM32CubeMX generated sources
 add_subdirectory(cmake/stm32cubemx)
 
@@ -62,9 +82,9 @@ endif()
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
     Core/Inc
-    Drivers/STM32F4xx_HAL_Driver/Inc
-    Drivers/CMSIS/Device/ST/STM32F4xx/Include
-    Drivers/CMSIS/Include
+    ${STARLET_DRIVERS}/STM32F4xx_HAL_Driver/Inc
+    ${STARLET_DRIVERS}/CMSIS/Device/ST/STM32F4xx/Include
+    ${STARLET_DRIVERS}/CMSIS/Include
 )
 
 # Add project symbols (macros)
@@ -78,3 +98,4 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
 
     # Add user defined libraries
 )
+

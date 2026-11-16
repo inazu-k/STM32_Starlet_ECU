@@ -41,7 +41,6 @@
 *.dwo
 
 # MCU bender driver
-*.s
 *.icf
 Drivers/*
 
@@ -50,3 +49,7 @@ build/*
 
 # Document File
 *.pdf
+
+# Python host test artifacts
+__pycache__/
+*.pyc
