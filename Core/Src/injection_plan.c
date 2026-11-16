@@ -5,11 +5,18 @@
 
 InjectionAction injection_control_ne(InjectionControl *c, float rpm, bool valid, bool locked)
 {
-    if (!c || !valid || !isfinite(rpm) || rpm<=0 || (c->seen_phase && !locked))
+    if (!c) return INJ_NEEDS_POLICY;
+    if (c->policy_required || !valid || !isfinite(rpm) || rpm<=0 || (c->seen_phase && !locked)) {
+        c->policy_required=true;
         return INJ_NEEDS_POLICY;
+    }
     if (locked) c->seen_phase=true;
-    InjectionMode mode=rpm>=500 && locked ? INJ_ANGLED : INJ_SIMULTANEOUS;
-    if (mode!=c->mode) {
+    bool cranking=rpm<500;
+    bool returned_low=c->mode!=INJ_STOPPED && !c->cranking && cranking;
+    c->cranking=cranking;
+    InjectionMode mode=!cranking && locked ? INJ_ANGLED : INJ_SIMULTANEOUS;
+    /* 初回位相未確定でも運転状態の低回転復帰を独立して検出する。 */
+    if (mode!=c->mode || returned_low) {
         c->mode=mode;
         c->periods=0;
         return INJ_MODE_CHANGED;

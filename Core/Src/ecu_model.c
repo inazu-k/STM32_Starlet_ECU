@@ -1,5 +1,6 @@
 #include "ecu_model.h"
 #include <math.h>
+#include <float.h>
 
 /* 軸の不正、重複、非有限値を補間前に検出する。 */
 static bool axis_valid(const float *axis, size_t n)
@@ -65,6 +66,8 @@ bool ecu_phase_angle(const EcuPhase *p, const EngineSync *s, float *degrees)
         s->state!=SYNC_LOCKED || s->tooth>=24) return false;
     float angle=30.0f*s->tooth-p->offset_deg;
     if (angle<0) angle+=720;
+    /* 微小な正のδでは加算の丸めで720になるため、同じ位相の0へ正規化する。 */
+    if (angle>=720) angle=0;
     *degrees=angle;
     return true;
 }
@@ -78,8 +81,9 @@ bool ecu_rpm(const EngineSync *s, uint32_t hz, float *rpm)
 
 bool ecu_fuel(const EcuFuelConfig *c, EcuFuelInput in, bool simultaneous, EcuFuelResult *out)
 {
-    if (!c || !out) return false;
+    if (!out) return false;
     *out=(EcuFuelResult){0};
+    if (!c) return false;
     if (!in.valid || !isfinite(in.rpm) || in.rpm<=0 || !isfinite(in.map_kpa) || in.map_kpa<=0 ||
         !isfinite(in.battery_v) || in.battery_v<=0 || !isfinite(in.air_mass_at_100_ve) ||
         in.air_mass_at_100_ve<=0 || !isfinite(c->stoich_afr) || c->stoich_afr<=0 ||
@@ -89,11 +93,18 @@ bool ecu_fuel(const EcuFuelConfig *c, EcuFuelInput in, bool simultaneous, EcuFue
     if (!ecu_lookup2(c->ve,in.rpm,in.map_kpa,&ve) || ve<0 ||
         !ecu_lookup2(c->lambda,in.rpm,in.map_kpa,&lambda) || lambda<=0 ||
         !ecu_lookup1(c->dead_ms,in.battery_v,&dead) || dead<0) return false;
-    float mass=in.air_mass_at_100_ve*(ve/100.0f)/(lambda*c->stoich_afr);
+    /* 有限float同士でも中間積はoverflowし得る。doubleで計算し、
+     * 公開するfloatへの変換時にoverflowと正数のunderflowを検出する。 */
+    double mass=(double)in.air_mass_at_100_ve*((double)ve/100.0)/
+                ((double)lambda*c->stoich_afr);
     if (in.rpm<500) mass*=c->crank_factor;
-    float event=simultaneous ? mass/2 : mass;
-    float pulse=event/c->injector_mass_per_ms+dead;
-    if (!isfinite(mass) || !isfinite(event) || !isfinite(pulse) || pulse<0) return false;
-    *out=(EcuFuelResult){mass,event,pulse};
+    double event=simultaneous ? mass/2 : mass;
+    double pulse=event/c->injector_mass_per_ms+dead;
+    if (!isfinite(mass) || !isfinite(event) || !isfinite(pulse) || pulse<0 ||
+        mass>FLT_MAX || event>FLT_MAX || pulse>FLT_MAX) return false;
+    EcuFuelResult result={(float)mass,(float)event,(float)pulse};
+    if ((mass>0 && result.mass_720==0) || (event>0 && result.event_mass==0) ||
+        (pulse>0 && result.pulse_ms==0)) return false;
+    *out=result;
     return true;
 }

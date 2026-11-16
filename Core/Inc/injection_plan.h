@@ -9,6 +9,8 @@ typedef struct {
     InjectionMode mode;
     unsigned periods;
     bool seen_phase;
+    bool cranking; /* 噴射方式とは独立した500rpm未満の運転状態。 */
+    bool policy_required; /* 未定義の異常から通常要求へ自動復帰させない。 */
 } InjectionControl;
 typedef struct {
     uint32_t start, end, active_end;
@@ -17,7 +19,9 @@ typedef struct {
 typedef struct { InjectionPulse group[2]; uint32_t generation; } InjectionPlan;
 typedef enum { INJ_RESERVED, INJ_SKIP_LATE, INJ_SKIP_OVERLAP, INJ_BAD_REQUEST } InjectionReserve;
 /* 有効回転を確認したNEをcount=0とし、以後の有効NEごとに1回呼ぶ。
- * 停止以外の入力無効・一度成立した位相の喪失は仕様追加確認が必要と返す。 */
+ * 停止以外の入力無効・一度成立した位相の喪失は仕様追加確認が必要と返す。
+ * この状態はラッチされ、停止リセットまで通常要求を再開しない。
+ * 500rpm以上から未満への遷移は同じ同時噴射方式でも待機を初期化する。 */
 InjectionAction injection_control_ne(InjectionControl *control, float rpm,
                                      bool valid, bool phase_locked);
 /* 停止で全予約・実行中状態とカウンタを消去。校正設定は別管理。 */

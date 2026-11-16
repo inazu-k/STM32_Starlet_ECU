@@ -30,7 +30,8 @@ typedef struct {
     bool valid;
 } EcuFuelInput;
 typedef struct { float mass_720, event_mass, pulse_ms; } EcuFuelResult;
-/* simultaneous=true は360度ごとの2分配。水温・O2補正は行わない。 */
+/* simultaneous=true は360度ごとの2分配。水温・O2補正は行わない。
+ * 失敗時はresultが非NULLならゼロ初期化する。floatで表現できない結果は拒否。 */
 bool ecu_fuel(const EcuFuelConfig *config, EcuFuelInput input,
               bool simultaneous, EcuFuelResult *result);
 #endif

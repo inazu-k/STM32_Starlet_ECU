@@ -33,3 +33,13 @@ foreach(target ecu_model_tests sensor_tests)
         target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic -Werror -UNDEBUG)
     endif()
 endforeach()
+
+add_executable(ecu_regression_tests ecu_regression_test.c ../Core/Src/ecu_model.c
+    ../Core/Src/injection_plan.c ../Core/Src/engine_sync.c)
+target_include_directories(ecu_regression_tests PRIVATE ../Core/Inc)
+target_link_libraries(ecu_regression_tests PRIVATE m)
+set_target_properties(ecu_regression_tests PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(ecu_regression_tests PRIVATE -Wall -Wextra -Wpedantic -Werror -UNDEBUG)
+endif()
+add_test(NAME ecu_regression COMMAND ecu_regression_tests)
