@@ -5,7 +5,7 @@
 /* 軸の不正、重複、非有限値を補間前に検出する。 */
 static bool axis_valid(const float *axis, size_t n)
 {
-    if (!axis || n == 0) return false;
+    if (!axis || n == 0 || n > SIZE_MAX/sizeof *axis) return false;
     for (size_t i = 0; i < n; ++i)
         if (!isfinite(axis[i]) || (i && axis[i] <= axis[i-1])) return false;
     return true;
@@ -38,8 +38,11 @@ bool ecu_lookup1(EcuTable1 t, float x, float *out)
 
 bool ecu_lookup2(EcuTable2 t, float x, float y, float *out)
 {
-    if (!out || !isfinite(x) || !isfinite(y) || !t.values ||
-        !axis_valid(t.x,t.nx) || !axis_valid(t.y,t.ny) || t.ny > SIZE_MAX/t.nx) return false;
+    /* 寸法の積とfloat配列のバイト数を、軸を読む前に検証する。
+     * 除算で確認し、検証そのものによる整数overflowを避ける。 */
+    if (!out || !isfinite(x) || !isfinite(y) || !t.values || !t.nx || !t.ny ||
+        t.nx > SIZE_MAX/sizeof *t.values/t.ny ||
+        !axis_valid(t.x,t.nx) || !axis_valid(t.y,t.ny)) return false;
     for (size_t k=0;k<t.nx*t.ny;++k) if (!isfinite(t.values[k])) return false;
     float fx, fy;
     size_t i=bracket(t.x,t.nx,x,&fx), j=bracket(t.y,t.ny,y,&fy);

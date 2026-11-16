@@ -31,3 +31,13 @@ sensor試験はHALをスタブ化し、4チャネルのハンドル・保存先�
 
 
 `ecu_regression`は追加コードのレビューで判明した条件を再現する。初回位相未確定の500rpm以上→未満で待機をリセットすること、無効入力／位相喪失の追加確認状態を保持すること、燃料計算の有限入力による中間overflowと最終underflowの扱い、NULL設定時の結果消去、微小TDCオフセットで角度が720度にならないことを確認する。
+
+
+`model_boundary`はテーブルの軸／格子数のバイト数overflowを配列走査より前に拒否することと、予定終了の遅刻通知、同じ呼出しに含まれる正常開始との共存、時刻周回時の終了遅刻を検証する。
+検査付きの実行例（GCC、Linux）:
+
+```sh
+ASAN_OPTIONS=detect_leaks=0 CC='cc -O2 -fsanitize=address,undefined,float-cast-overflow -fno-sanitize-recover=all' python3 tests/run_host_tests.py
+```
+
+`detect_leaks=0`はptrace下でLeakSanitizerが動作しない環境向け。AddressSanitizerの境界外アクセス検査と未定義動作の検査は有効のまま。これはリーク検査の実施を意味しない。

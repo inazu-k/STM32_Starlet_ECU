@@ -43,3 +43,13 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(ecu_regression_tests PRIVATE -Wall -Wextra -Wpedantic -Werror -UNDEBUG)
 endif()
 add_test(NAME ecu_regression COMMAND ecu_regression_tests)
+
+add_executable(model_boundary_tests model_boundary_test.c ../Core/Src/ecu_model.c
+    ../Core/Src/injection_plan.c)
+target_include_directories(model_boundary_tests PRIVATE ../Core/Inc)
+target_link_libraries(model_boundary_tests PRIVATE m)
+set_target_properties(model_boundary_tests PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(model_boundary_tests PRIVATE -Wall -Wextra -Wpedantic -Werror -UNDEBUG)
+endif()
+add_test(NAME model_boundary COMMAND model_boundary_tests)

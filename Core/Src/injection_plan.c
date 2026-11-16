@@ -80,7 +80,11 @@ bool injection_plan_advance(InjectionPlan *p, uint32_t now)
     bool on_time=true;
     for (unsigned g=0;g<2;++g) {
         InjectionPulse *pulse=&p->group[g];
-        if (pulse->active && (uint32_t)(now-pulse->active_end)<HALF) pulse->active=false;
+        if (pulse->active && (uint32_t)(now-pulse->active_end)<HALF) {
+            /* 終了状態は反映しつつ、遅刻終了も呼出し元へ通知する。 */
+            if (now!=pulse->active_end) on_time=false;
+            pulse->active=false;
+        }
         if (pulse->pending && (uint32_t)(now-pulse->start)<HALF) {
             pulse->pending=false;
             if (now!=pulse->start) { on_time=false; continue; }

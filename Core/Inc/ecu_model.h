@@ -2,7 +2,8 @@
 #define ECU_MODEL_H
 #include "engine_sync.h"
 #include <stddef.h>
-/* 配列の所有権は呼出し元。値は y 行、x 列の順。単位は各利用側で明記する。 */
+/* 配列の所有権は呼出し元。値は y 行、x 列の順。単位は各利用側で明記する。
+ * 寸法のバイト数overflowは拒否するが、実配列の長さは呼出し元が保証する。 */
 typedef struct { const float *axis, *values; size_t count; } EcuTable1;
 typedef struct {
     const float *x, *y, *values;

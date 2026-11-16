@@ -35,7 +35,9 @@ InjectionReserve injection_reserve(InjectionPlan *plan, unsigned group,
 /* 30度のNE周期から次の終了角までのtick数を求める（歯間一定速の論理予測）。 */
 bool injection_end_delay(float current_deg, float end_a_deg, unsigned group,
                          uint32_t period_ticks, uint32_t *delay);
-/* 予定時刻に呼ぶ仮想タイマ。遅刻開始は実行せずfalseを返す。
+/* 予定時刻に呼ぶ仮想タイマ。開始／終了の遅刻はfalseを返す。
+ * 遅刻開始は実行しない。遅刻終了はactiveを消去して遅刻を通知する。
+ * 同じ呼出しの他の正常イベントは処理する。時刻は正順、処理空白は2^31未満。
  * 実機の遅刻処理は未確定。テスト／ベンチ計画専用。 */
 bool injection_plan_advance(InjectionPlan *plan, uint32_t now);
 #endif
