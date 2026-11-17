@@ -1,55 +1,32 @@
 cmake_minimum_required(VERSION 3.22)
 project(engine_sync_tests C)
 enable_testing()
-add_executable(engine_sync_tests engine_sync_test.c ../Core/Src/engine_sync.c)
-target_include_directories(engine_sync_tests PRIVATE ../Core/Inc)
-set_target_properties(engine_sync_tests PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
-if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(engine_sync_tests PRIVATE -Wall -Wextra -Wpedantic -Werror)
-endif()
-add_test(NAME engine_sync COMMAND engine_sync_tests)
 
-add_executable(engine_sync_service_tests engine_sync_service_test.c
-    ../Core/Src/engine_sync.c ../Core/Src/engine_sync_service.c)
-target_include_directories(engine_sync_service_tests PRIVATE ../Core/Inc)
-set_target_properties(engine_sync_service_tests PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
-if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(engine_sync_service_tests PRIVATE -Wall -Wextra -Wpedantic -Werror)
-endif()
-add_test(NAME engine_sync_service COMMAND engine_sync_service_tests)
-
-
-add_executable(ecu_model_tests ecu_model_test.c ../Core/Src/ecu_model.c
-    ../Core/Src/injection_plan.c ../Core/Src/engine_sync.c)
-target_include_directories(ecu_model_tests PRIVATE ../Core/Inc)
-target_link_libraries(ecu_model_tests PRIVATE m)
-add_test(NAME ecu_model COMMAND ecu_model_tests)
-add_executable(sensor_tests sensor_test.c ../Core/Src/efi_calc.c)
-target_include_directories(sensor_tests PRIVATE stubs ../Core/Inc)
-add_test(NAME sensors COMMAND sensor_tests)
-foreach(target ecu_model_tests sensor_tests)
+# テスト名と実行ファイル名を維持し、共通のコンパイル設定と登録をまとめる。
+function(add_host_test name target)
+    add_executable(${target} ${ARGN})
+    target_include_directories(${target} PRIVATE ../Core/Inc)
     set_target_properties(${target} PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
     if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
         target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic -Werror -UNDEBUG)
     endif()
+    add_test(NAME ${name} COMMAND ${target})
+endfunction()
+
+add_host_test(engine_sync engine_sync_tests
+    engine_sync_test.c ../Core/Src/engine_sync.c)
+add_host_test(engine_sync_service engine_sync_service_tests
+    engine_sync_service_test.c ../Core/Src/engine_sync.c ../Core/Src/engine_sync_service.c)
+add_host_test(ecu_model ecu_model_tests
+    ecu_model_test.c ../Core/Src/ecu_model.c ../Core/Src/injection_plan.c ../Core/Src/engine_sync.c)
+add_host_test(sensors sensor_tests sensor_test.c ../Core/Src/efi_calc.c)
+add_host_test(ecu_regression ecu_regression_tests
+    ecu_regression_test.c ../Core/Src/ecu_model.c ../Core/Src/injection_plan.c ../Core/Src/engine_sync.c)
+add_host_test(model_boundary model_boundary_tests
+    model_boundary_test.c ../Core/Src/ecu_model.c ../Core/Src/injection_plan.c)
+
+# ADC試験では実機用main.hよりHALスタブを優先する。
+target_include_directories(sensor_tests BEFORE PRIVATE stubs)
+foreach(target ecu_model_tests ecu_regression_tests model_boundary_tests)
+    target_link_libraries(${target} PRIVATE m)
 endforeach()
-
-add_executable(ecu_regression_tests ecu_regression_test.c ../Core/Src/ecu_model.c
-    ../Core/Src/injection_plan.c ../Core/Src/engine_sync.c)
-target_include_directories(ecu_regression_tests PRIVATE ../Core/Inc)
-target_link_libraries(ecu_regression_tests PRIVATE m)
-set_target_properties(ecu_regression_tests PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
-if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(ecu_regression_tests PRIVATE -Wall -Wextra -Wpedantic -Werror -UNDEBUG)
-endif()
-add_test(NAME ecu_regression COMMAND ecu_regression_tests)
-
-add_executable(model_boundary_tests model_boundary_test.c ../Core/Src/ecu_model.c
-    ../Core/Src/injection_plan.c)
-target_include_directories(model_boundary_tests PRIVATE ../Core/Inc)
-target_link_libraries(model_boundary_tests PRIVATE m)
-set_target_properties(model_boundary_tests PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED YES)
-if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(model_boundary_tests PRIVATE -Wall -Wextra -Wpedantic -Werror -UNDEBUG)
-endif()
-add_test(NAME model_boundary COMMAND model_boundary_tests)

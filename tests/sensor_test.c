@@ -31,7 +31,7 @@ HAL_StatusTypeDef HAL_ADC_Stop(ADC_HandleTypeDef *h)
 uint32_t HAL_GetTick(void) { return tick; }
 int main(void)
 {
-    assert(!EFI_IdleValid());
+    assert(!EFI_IdleValid() && !EFI_GetIdle());
     assert(!EFI_GetSample(EFI_MAP).valid);
     tick=42; SensorDataSample();
     unsigned expected[]={1300,1400,600,700};
@@ -48,9 +48,10 @@ int main(void)
         assert(EFI_GetSample(EFI_AF).valid && EFI_GetSample(EFI_KNOCK).valid);
     }
     assert(!EFI_GetSample((EfiSensor)-1).valid);
-    EFI_SetThrottleClosed(true,true); JdgIdle(); assert(EFI_GetIdle() && EFI_IdleValid());
-    fail_stage=0; SensorDataSample(); ReadGPIOPort(); JdgIdle(); assert(EFI_GetIdle());
-    EFI_SetThrottleClosed(true,false); JdgIdle(); assert(!EFI_GetIdle() && !EFI_IdleValid());
-    EFI_SetThrottleClosed(false,true); JdgIdle(); assert(!EFI_GetIdle());
+    EFI_SetThrottleClosed(true,true); assert(EFI_GetIdle() && EFI_IdleValid());
+    fail_stage=0; SensorDataSample(); assert(EFI_GetIdle());
+    EFI_SetThrottleClosed(true,false); assert(!EFI_GetIdle() && !EFI_IdleValid());
+    EFI_SetThrottleClosed(false,true); assert(!EFI_GetIdle() && EFI_IdleValid());
+    EFI_SetThrottleClosed(false,false); assert(!EFI_GetIdle() && !EFI_IdleValid());
     puts("sensors: all checks passed");
 }

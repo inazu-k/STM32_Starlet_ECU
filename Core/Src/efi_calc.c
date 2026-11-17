@@ -3,7 +3,7 @@
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
 static EfiSample samples[EFI_SENSOR_COUNT];
-static bool throttle_closed, throttle_valid, idle;
+static bool throttle_closed, throttle_valid;
 
 /* チャネルごとに独立した保存先を持ち、取得失敗時は値を有効としない。
  * MAP=PC3/IN13、水温=PC4/IN14、A/F=PA6/IN6、ノック=PA7/IN7。
@@ -44,11 +44,8 @@ void EFI_SetThrottleClosed(bool closed, bool valid)
 {
     throttle_closed=closed;
     throttle_valid=valid;
-    idle=valid && closed;
 }
 
-/* NE候補・ボタン・水温をTPSとして解釈しない。 */
-void ReadGPIOPort(void) { }
-void JdgIdle(void) { idle=throttle_valid && throttle_closed; }
-bool EFI_GetIdle(void) { return idle; }
+/* 有効なTPS全閉情報から判定し、派生した状態を重複して保持しない。 */
+bool EFI_GetIdle(void) { return throttle_valid && throttle_closed; }
 bool EFI_IdleValid(void) { return throttle_valid; }

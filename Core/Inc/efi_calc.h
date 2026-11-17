@@ -12,8 +12,6 @@ void SensorDataSample(void);
 EfiSample EFI_GetSample(EfiSensor sensor);
 /* TPSの端子・しきい値が未確定のため、全閉を確認した上位層だけが供給する。 */
 void EFI_SetThrottleClosed(bool closed, bool valid);
-void ReadGPIOPort(void);
-void JdgIdle(void);
 bool EFI_GetIdle(void);
 bool EFI_IdleValid(void);
 #ifdef __cplusplus

@@ -50,19 +50,9 @@ ADC_HandleTypeDef hadc2;
 UART_HandleTypeDef huart2;
 TIM_HandleTypeDef htim2;
 
-typedef struct
-{
-  GPIO_TypeDef *port;
-  uint16_t pin;
-  uint32_t period_ms;
-  uint32_t counter;
-  uint8_t enabled;
-} GpioTimerTask_t;
-
-#define GPIO_TIMER_TASK_NUM 3
-static GpioTimerTask_t gpio_tasks[GPIO_TIMER_TASK_NUM];
-
 /* USER CODE BEGIN PV */
+/* TIM2の1ms更新を数え、LD2だけを100msごとにトグルする。 */
+static uint32_t led_elapsed_ms;
 
 /* USER CODE END PV */
 
@@ -73,7 +63,6 @@ static void MX_ADC1_Init(void);
 static void MX_ADC2_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM2_Init(void);
-static void InitGpioTimerTasks(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -116,7 +105,6 @@ int main(void)
   MX_ADC2_Init();
   MX_USART2_UART_Init();
   MX_TIM2_Init();
-  InitGpioTimerTasks();
   if (HAL_TIM_Base_Start_IT(&htim2) != HAL_OK) Error_Handler();
   /* USER CODE BEGIN 2 */
 #ifdef STARLET_SYNC_BENCH
@@ -139,8 +127,6 @@ int main(void)
 #ifdef STARLET_SYNC_BENCH
     engine_sync_board_run();
 #endif
-    ReadGPIOPort();       // ポート読み取り
-    JdgIdle();            // アイドル判定
     /* 燃料・点火要求は校正済み入力の供給後に接続する（確認リスト参照）。 */
     
     /* USER CODE BEGIN 3 */
@@ -424,44 +410,13 @@ static void MX_TIM2_Init(void)
   HAL_NVIC_EnableIRQ(TIM2_IRQn);
 }
 
-static void InitGpioTimerTasks(void)
-{
-  gpio_tasks[0].port = GPIOA;
-  gpio_tasks[0].pin = LD2_Pin;
-  gpio_tasks[0].period_ms = 100;
-  gpio_tasks[0].counter = 0;
-  gpio_tasks[0].enabled = 1;
-
-  gpio_tasks[1].port = GPIOC;
-  gpio_tasks[1].pin = GPIO_PIN_10;
-  gpio_tasks[1].period_ms = 250;
-  gpio_tasks[1].counter = 0;
-  gpio_tasks[1].enabled = 0;
-
-  gpio_tasks[2].port = GPIOB;
-  gpio_tasks[2].pin = GPIO_PIN_7;
-  gpio_tasks[2].period_ms = 500;
-  gpio_tasks[2].counter = 0;
-  gpio_tasks[2].enabled = 0;
-}
-
+/* TIM2の更新割り込みだけでLEDを駆動し、他のタイマでは何もしない。 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  if (htim->Instance == TIM2)
+  if (htim->Instance == TIM2 && ++led_elapsed_ms >= 100U)
   {
-    for (uint8_t i = 0; i < GPIO_TIMER_TASK_NUM; i++)
-    {
-      if (gpio_tasks[i].enabled)
-      {
-        gpio_tasks[i].counter++;
-
-        if (gpio_tasks[i].counter >= gpio_tasks[i].period_ms)
-        {
-          gpio_tasks[i].counter = 0;
-          HAL_GPIO_TogglePin(gpio_tasks[i].port, gpio_tasks[i].pin);
-        }
-      }
-    }
+    led_elapsed_ms = 0;
+    HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
   }
 }
 
